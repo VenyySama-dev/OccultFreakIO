@@ -1,71 +1,125 @@
 /* =============================================================================
-   ARG MASTER CONFIGURATION & PUZZLE DATABASE
+   2008 HORROR ARG CONFIGURATION
    -----------------------------------------------------------------------------
-   Configure your ARG secrets, passwords, hints, and background here!
+   Configure your background, passwords, clues, and responses here!
    ============================================================================= */
 const ARG_CONFIG = {
-  // (Optional) JavaScript background image override.
-  // Leave empty to use the background configured at the top of style.css.
-  backgroundImage: "", 
+  // Optional background image override in JavaScript.
+  // By default, it uses the '--bg-image' in style.css.
+  backgroundImage: "",
 
-  // Audio effects enabled by default (players can toggle via the top-right button)
+  // Sound enabled by default (toggle via [ audio: muted ] in the corner)
   soundEnabled: false,
 
-  // PUZZLE PASSWORDS (case-insensitive keys)
-  // Add as many passwords / riddles as you want for your ARG!
+  // Passwords and riddles (case-insensitive)
   passwords: {
     "eye": {
-      status: "INITIATION VERIFIED",
-      title: "ACCESS GRANTED // THE ALL SEEING EYE OPENS",
-      message: "The veil of ignorance dissolves. You are recognized as an Initiate of the Archive.",
-      clue: "FREQUENCY: 142.857 MHz // SECTOR: Nevada 37.2431°N, 115.7930°W // NEXT KEYWORD: 'ouroboros'",
-      redirectUrl: null // Set to a URL string (e.g. "https://...") if you want an automatic redirect!
+      title: "ACCESS GRANTED",
+      message: "The eye has seen you. Tape 04 unsealed.",
+      clue: "Seek frequency 142.857 MHz. Coordinates: 37.2431 N, 115.7930 W. Next word: 'ouroboros'",
+      redirectUrl: null
     },
     "ouroboros": {
-      status: "RECURSION CYCLE",
-      title: "NODE 02 UNLOCKED // ETERNAL CONSUMPTION",
-      message: "The serpent has swallowed its tail. Time is a circle without beginning or end.",
-      clue: "TRANSMISSION: Look inside the HTML comments of this page for the third fragment.",
+      title: "LOOP RECOGNIZED",
+      message: "The tape restarts itself. It never ended.",
+      clue: "Check the source code metadata for the date of the incident.",
       redirectUrl: null
     },
     "freak": {
-      status: "FELLOW OCCULTIST",
-      title: "TRANSMISSION RECEIVED // OCCULT FREAK RECOGNIZED",
-      message: "You have found the inner sanctum. Keep your eyes sharp and ears open.",
-      clue: "ARCHIVE HASH: SHA-256 [0x7f4a...9b12]. We will contact you soon.",
+      title: "CONNECTION ESTABLISHED",
+      message: "You are not the first to find this camera.",
+      clue: "Archive fragment: 'Don't look back into the hallway.'",
       redirectUrl: null
     }
   },
 
-  // Randomized messages when an incorrect password is entered:
-  denialMessages: [
-    "ACCESS DENIED // Invalid cipher token.",
-    "THE EYE REMAINS BLIND // Hash mismatch in sub-sector 9.",
-    "AUTHENTICATION FAILED // Your IP signature has been logged.",
-    "CIPHER REJECTED // The veil will not yield to this key.",
-    "SECURITY BREACH DETECTED // Return to terminal zero."
+  // Randomized error messages when a wrong password is typed:
+  errorMessages: [
+    "access denied.",
+    "invalid cipher key.",
+    "tape sequence corrupted.",
+    "nothing here.",
+    "the eye is closed."
   ]
 };
 
 /* =============================================================================
-   BACKGROUND DYNAMIC INITIALIZATION
+   EASY BACKGROUND INITIALIZATION
    ============================================================================= */
 (function initBackground() {
   if (ARG_CONFIG.backgroundImage && ARG_CONFIG.backgroundImage.trim() !== "") {
-    const bgLayer = document.getElementById("bg-layer");
-    if (bgLayer) {
-      bgLayer.style.backgroundImage = `url('${ARG_CONFIG.backgroundImage}')`;
+    const bg = document.getElementById("bg-layer");
+    if (bg) {
+      bg.style.backgroundImage = `url('${ARG_CONFIG.backgroundImage}')`;
     }
   }
 })();
 
 /* =============================================================================
-   SYNTHESIZED WEB AUDIO ENGINE (Zero External Audio Files Needed)
+   2008 ANALOG STATIC NOISE ENGINE (CANVAS)
+   Generates authentic gritty TV / CCD sensor grain at 22 fps.
    ============================================================================= */
-class ArgAudioEngine {
+(function initNoiseCanvas() {
+  const canvas = document.getElementById("noise-canvas");
+  if (!canvas) return;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return;
+
+  // Offscreen low-res buffer for genuine 2008 retro pixelated noise
+  const bufferWidth = 240;
+  const bufferHeight = 160;
+  const offscreen = document.createElement("canvas");
+  offscreen.width = bufferWidth;
+  offscreen.height = bufferHeight;
+  const offCtx = offscreen.getContext("2d");
+  const imgData = offCtx.createImageData(bufferWidth, bufferHeight);
+  const buffer32 = new Uint32Array(imgData.data.buffer);
+
+  function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+  window.addEventListener("resize", resizeCanvas);
+  resizeCanvas();
+
+  let lastFrame = 0;
+  const fpsInterval = 1000 / 22; // 22 fps analog grain jitter
+
+  function renderNoise(timestamp) {
+    requestAnimationFrame(renderNoise);
+
+    const elapsed = timestamp - lastFrame;
+    if (elapsed < fpsInterval) return;
+    lastFrame = timestamp - (elapsed % fpsInterval);
+
+    const len = buffer32.length;
+    for (let i = 0; i < len; i++) {
+      // Gritty monochrome grain with occasional speckle
+      const val = (Math.random() * 255) | 0;
+      buffer32[i] = (255 << 24) | (val << 16) | (val << 8) | val;
+    }
+
+    offCtx.putImageData(imgData, 0, 0);
+
+    // Blit scaled noise to full screen canvas
+    ctx.imageSmoothingEnabled = false;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(offscreen, 0, 0, canvas.width, canvas.height);
+  }
+
+  requestAnimationFrame(renderNoise);
+})();
+
+/* =============================================================================
+   SYNTHESIZED 2008 HORROR AUDIO ENGINE
+   Tape drone, static hiss, and mechanical keystrokes.
+   ============================================================================= */
+class HorrorAudioEngine {
   constructor() {
     this.ctx = null;
     this.enabled = ARG_CONFIG.soundEnabled;
+    this.noiseNode = null;
+    this.noiseGain = null;
   }
 
   ensureContext() {
@@ -82,11 +136,59 @@ class ArgAudioEngine {
 
   toggle() {
     this.enabled = !this.enabled;
+    this.ensureContext();
+
     if (this.enabled) {
-      this.ensureContext();
-      this.playBeep(440, 0.08, "sine");
+      this.startTapeHiss();
+      this.playTone(300, 0.08, "square", 0.05);
+    } else {
+      this.stopTapeHiss();
     }
     return this.enabled;
+  }
+
+  startTapeHiss() {
+    if (!this.ctx || this.noiseNode) return;
+
+    // Generate gentle background tape static buffer
+    const bufferSize = this.ctx.sampleRate * 2;
+    const noiseBuffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+    const output = noiseBuffer.getChannelData(0);
+    for (let i = 0; i < bufferSize; i++) {
+      output[i] = Math.random() * 2 - 1;
+    }
+
+    const whiteNoise = this.ctx.createBufferSource();
+    whiteNoise.buffer = noiseBuffer;
+    whiteNoise.loop = true;
+
+    // Filter to sound like low tape hiss / rumble
+    const filter = this.ctx.createBiquadFilter();
+    filter.type = "bandpass";
+    filter.frequency.value = 800;
+    filter.Q.value = 1.0;
+
+    const gain = this.ctx.createGain();
+    gain.gain.setValueAtTime(0.012, this.ctx.currentTime);
+
+    whiteNoise.connect(filter);
+    filter.connect(gain);
+    gain.connect(this.ctx.destination);
+
+    whiteNoise.start();
+    this.noiseNode = whiteNoise;
+    this.noiseGain = gain;
+  }
+
+  stopTapeHiss() {
+    if (this.noiseNode) {
+      try {
+        this.noiseNode.stop();
+        this.noiseNode.disconnect();
+      } catch (e) {}
+      this.noiseNode = null;
+      this.noiseGain = null;
+    }
   }
 
   playKeypress() {
@@ -98,22 +200,21 @@ class ArgAudioEngine {
     const gain = this.ctx.createGain();
     const now = this.ctx.currentTime;
 
-    osc.type = "sine";
-    // Subtle typewriter click tone
-    osc.frequency.setValueAtTime(750 + Math.random() * 250, now);
-    osc.frequency.exponentialRampToValueAtTime(200, now + 0.035);
+    osc.type = "triangle";
+    osc.frequency.setValueAtTime(450 + Math.random() * 150, now);
+    osc.frequency.exponentialRampToValueAtTime(100, now + 0.025);
 
     gain.gain.setValueAtTime(0.04, now);
-    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.035);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.025);
 
     osc.connect(gain);
     gain.connect(this.ctx.destination);
 
     osc.start(now);
-    osc.stop(now + 0.04);
+    osc.stop(now + 0.03);
   }
 
-  playDenialBuzz() {
+  playDenialDistortion() {
     if (!this.enabled) return;
     this.ensureContext();
     if (!this.ctx) return;
@@ -123,59 +224,56 @@ class ArgAudioEngine {
     const gain = this.ctx.createGain();
 
     osc.type = "sawtooth";
-    osc.frequency.setValueAtTime(140, now);
-    osc.frequency.linearRampToValueAtTime(80, now + 0.35);
+    osc.frequency.setValueAtTime(90, now);
+    osc.frequency.linearRampToValueAtTime(50, now + 0.3);
 
-    gain.gain.setValueAtTime(0.12, now);
-    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.35);
+    gain.gain.setValueAtTime(0.15, now);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.3);
 
     osc.connect(gain);
     gain.connect(this.ctx.destination);
 
     osc.start(now);
-    osc.stop(now + 0.36);
+    osc.stop(now + 0.32);
   }
 
-  playSuccessChord() {
+  playSuccessDrone() {
     if (!this.enabled) return;
     this.ensureContext();
     if (!this.ctx) return;
 
-    const freqs = [220, 277.18, 329.63, 440, 554.37]; // A major chord
+    const freqs = [164.81, 196.00, 246.94]; // E minor chord
     const now = this.ctx.currentTime;
 
-    freqs.forEach((freq, idx) => {
+    freqs.forEach(freq => {
       const osc = this.ctx.createOscillator();
       const gain = this.ctx.createGain();
 
       osc.type = "sine";
-      osc.frequency.setValueAtTime(freq, now + idx * 0.06);
+      osc.frequency.setValueAtTime(freq, now);
 
-      gain.gain.setValueAtTime(0.001, now + idx * 0.06);
-      gain.gain.linearRampToValueAtTime(0.06, now + idx * 0.06 + 0.1);
-      gain.gain.exponentialRampToValueAtTime(0.0001, now + 1.8);
+      gain.gain.setValueAtTime(0.001, now);
+      gain.gain.linearRampToValueAtTime(0.05, now + 0.2);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + 2.5);
 
       osc.connect(gain);
       gain.connect(this.ctx.destination);
 
-      osc.start(now + idx * 0.06);
-      osc.stop(now + 2.0);
+      osc.start(now);
+      osc.stop(now + 2.6);
     });
   }
 
-  playBeep(freq, duration, type = "sine") {
-    if (!this.enabled) return;
-    this.ensureContext();
+  playTone(freq, duration, type = "sine", volume = 0.05) {
     if (!this.ctx) return;
-
+    const now = this.ctx.currentTime;
     const osc = this.ctx.createOscillator();
     const gain = this.ctx.createGain();
-    const now = this.ctx.currentTime;
 
     osc.type = type;
     osc.frequency.setValueAtTime(freq, now);
 
-    gain.gain.setValueAtTime(0.08, now);
+    gain.gain.setValueAtTime(volume, now);
     gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
 
     osc.connect(gain);
@@ -186,205 +284,130 @@ class ArgAudioEngine {
   }
 }
 
-const audioEngine = new ArgAudioEngine();
+const audio = new HorrorAudioEngine();
 
 /* =============================================================================
-   INTERACTIVE SACRED EYE (Pupil Tracks Mouse / Touch)
+   PUPIL CURSOR TRACKING (SUBTLE & UNSETTLING)
    ============================================================================= */
-(function initPupilTracking() {
-  const pupilGroup = document.getElementById("interactive-pupil-group");
-  const eyeWrapper = document.getElementById("eye-wrapper");
+(function initPupil() {
+  const pupilGroup = document.getElementById("pupil-group");
+  const eye = document.getElementById("eye-container");
+  if (!pupilGroup || !eye) return;
 
-  if (!pupilGroup || !eyeWrapper) return;
+  function movePupil(clientX, clientY) {
+    const rect = eye.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
 
-  function updateEyePosition(clientX, clientY) {
-    const rect = eyeWrapper.getBoundingClientRect();
-    const eyeCenterX = rect.left + rect.width / 2;
-    const eyeCenterY = rect.top + rect.height / 2;
+    const dx = clientX - centerX;
+    const dy = clientY - centerY;
+    const angle = Math.atan2(dy, dx);
+    const dist = Math.min(6, Math.hypot(dx, dy) / 25);
 
-    const deltaX = clientX - eyeCenterX;
-    const deltaY = clientY - eyeCenterY;
+    const x = Math.cos(angle) * dist;
+    const y = Math.sin(angle) * dist;
 
-    const angle = Math.atan2(deltaY, deltaX);
-    const distance = Math.min(10, Math.hypot(deltaX, deltaY) / 18);
-
-    const moveX = Math.cos(angle) * distance;
-    const moveY = Math.sin(angle) * distance;
-
-    pupilGroup.style.transform = `translate(${moveX}px, ${moveY}px)`;
-    pupilGroup.style.transition = "transform 0.08s ease-out";
+    pupilGroup.style.transform = `translate(${x}px, ${y}px)`;
   }
 
-  window.addEventListener("mousemove", (e) => {
-    updateEyePosition(e.clientX, e.clientY);
-  });
-
-  window.addEventListener("touchmove", (e) => {
+  window.addEventListener("mousemove", e => movePupil(e.clientX, e.clientY));
+  window.addEventListener("touchmove", e => {
     if (e.touches && e.touches[0]) {
-      updateEyePosition(e.touches[0].clientX, e.touches[0].clientY);
+      movePupil(e.touches[0].clientX, e.touches[0].clientY);
     }
   }, { passive: true });
 })();
 
 /* =============================================================================
-   PASSWORD AUTHENTICATION & TERMINAL LOGIC
+   FORM LOGIC & PASSWORD VERIFICATION
    ============================================================================= */
 document.addEventListener("DOMContentLoaded", () => {
   const form = document.getElementById("password-form");
   const input = document.getElementById("password-input");
-  const display = document.getElementById("terminal-display");
-  const attemptsBadge = document.getElementById("attempts-badge");
-  const statusTag = document.getElementById("status-tag");
-  const occultCard = document.getElementById("occult-card");
-  const soundBtn = document.getElementById("sound-toggle-btn");
-  const soundIconOff = document.getElementById("sound-icon-off");
-  const soundIconOn = document.getElementById("sound-icon-on");
-  const soundLabel = document.getElementById("sound-label");
+  const output = document.getElementById("output-log");
+  const soundBtn = document.getElementById("sound-btn");
+  const container = document.querySelector(".horror-container");
 
-  let attempts = 0;
-  let isProcessing = false;
-
-  // Sound Toggle Handler
+  // Audio Toggle
   soundBtn.addEventListener("click", () => {
-    const isNowEnabled = audioEngine.toggle();
-    if (isNowEnabled) {
-      soundIconOff.classList.add("hidden");
-      soundIconOn.classList.remove("hidden");
-      soundLabel.textContent = "AUDIO: ON";
-      soundBtn.style.color = "var(--color-gold-bright)";
-      soundBtn.style.borderColor = "var(--color-gold-bright)";
-      logTerminalLine("SYSTEM: Audio feedback synthesizer connected.", "ready");
-    } else {
-      soundIconOff.classList.remove("hidden");
-      soundIconOn.classList.add("hidden");
-      soundLabel.textContent = "AUDIO: MUTED";
-      soundBtn.style.color = "";
-      soundBtn.style.borderColor = "";
-      logTerminalLine("SYSTEM: Audio feedback muted.", "hint");
-    }
+    const isEnabled = audio.toggle();
+    soundBtn.textContent = isEnabled ? "[ audio: on ]" : "[ audio: muted ]";
+    soundBtn.style.color = isEnabled ? "#7cd986" : "";
   });
 
-  // Typing sound effect
+  // Typing Audio
   input.addEventListener("input", () => {
-    audioEngine.playKeypress();
+    audio.playKeypress();
   });
 
-  // Form Submit / Password Verification
+  // Form Submit
   form.addEventListener("submit", (e) => {
     e.preventDefault();
-    if (isProcessing) return;
+    const val = input.value.trim().toLowerCase();
+    if (!val) return;
 
-    const rawValue = input.value.trim();
-    if (!rawValue) return;
+    // Immediate click feedback
+    audio.playKeypress();
 
-    const normalizedValue = rawValue.toLowerCase();
-    attempts++;
-    attemptsBadge.textContent = `ATTEMPTS: ${attempts}`;
-    isProcessing = true;
+    // Check Password
+    const match = ARG_CONFIG.passwords[val];
 
-    // Log query in terminal
-    logTerminalLine(`&gt; QUERY: "${escapeHtml(rawValue)}"`, "ready");
+    output.innerHTML = ""; // Keep it simple and clean
 
-    // Check if entered value is in our password database
-    setTimeout(() => {
-      const match = ARG_CONFIG.passwords[normalizedValue];
+    if (match) {
+      // SUCCESS
+      audio.playSuccessDrone();
 
-      if (match) {
-        // SUCCESS / CIPHER ACCEPTED
-        handlePasswordSuccess(match);
-      } else {
-        // FAILED / ACCESS DENIED
-        handlePasswordDenied();
+      const lineTitle = document.createElement("div");
+      lineTitle.className = "log-line success";
+      lineTitle.textContent = `> ${match.title}`;
+      output.appendChild(lineTitle);
+
+      const lineMsg = document.createElement("div");
+      lineMsg.className = "log-line";
+      lineMsg.textContent = match.message;
+      output.appendChild(lineMsg);
+
+      if (match.clue) {
+        const lineClue = document.createElement("div");
+        lineClue.className = "log-line clue";
+        lineClue.textContent = match.clue;
+        output.appendChild(lineClue);
       }
 
-      isProcessing = false;
-      input.value = "";
-      input.focus();
-    }, 400);
+      if (match.redirectUrl) {
+        setTimeout(() => {
+          window.location.href = match.redirectUrl;
+        }, 3000);
+      }
+    } else {
+      // DENIAL / ERROR
+      audio.playDenialDistortion();
+
+      // VHS tracking glitch
+      container.classList.remove("glitch-active");
+      void container.offsetWidth;
+      container.classList.add("glitch-active");
+
+      const randomErr = ARG_CONFIG.errorMessages[
+        Math.floor(Math.random() * ARG_CONFIG.errorMessages.length)
+      ];
+
+      const errLine = document.createElement("div");
+      errLine.className = "log-line error";
+      errLine.textContent = `> ${randomErr}`;
+      output.appendChild(errLine);
+    }
+
+    input.value = "";
+    input.focus();
   });
-
-  function handlePasswordSuccess(match) {
-    audioEngine.playSuccessChord();
-
-    // Card Glow & Status Update
-    occultCard.classList.add("unlocked-card");
-    statusTag.textContent = `STATUS: ${match.status || "UNLOCKED"}`;
-    statusTag.classList.add("unlocked");
-
-    logTerminalLine(`&gt; ${match.title}`, "granted");
-    logTerminalLine(`&gt; ${match.message}`, "granted");
-    
-    if (match.clue) {
-      logTerminalLine(`&gt; ${match.clue}`, "clue");
-    }
-
-    if (match.redirectUrl) {
-      logTerminalLine(`&gt; REDIRECTING IN 3 SECONDS...`, "ready");
-      setTimeout(() => {
-        window.location.href = match.redirectUrl;
-      }, 3000);
-    }
-  }
-
-  function handlePasswordDenied() {
-    audioEngine.playDenialBuzz();
-
-    // Shake Card Animation
-    occultCard.classList.remove("shake-card");
-    void occultCard.offsetWidth; // Trigger reflow
-    occultCard.classList.add("shake-card");
-
-    setTimeout(() => {
-      occultCard.classList.remove("shake-card");
-    }, 500);
-
-    // Pick a random denial message
-    const randomMsg = ARG_CONFIG.denialMessages[
-      Math.floor(Math.random() * ARG_CONFIG.denialMessages.length)
-    ];
-
-    logTerminalLine(`&gt; ${randomMsg}`, "denied");
-  }
-
-  function logTerminalLine(htmlText, typeClass = "") {
-    const line = document.createElement("div");
-    line.className = `term-row ${typeClass}`;
-    line.innerHTML = htmlText;
-    display.appendChild(line);
-
-    // Keep scroll pinned to bottom
-    display.scrollTop = display.scrollHeight;
-  }
-
-  function escapeHtml(str) {
-    return str
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;")
-      .replace(/'/g, "&#039;");
-  }
 });
 
 /* =============================================================================
-   DEVELOPER CONSOLE CLUES FOR ARG PLAYERS
+   CONSOLE EASTER EGG
    ============================================================================= */
-(function printConsoleEasterEgg() {
-  const asciiEye = `
-         .---.
-        /     \\
-       | () () |     [ OCCULT // FREAK // ALL SEEING EYE ]
-        \\  -  /      NODE-404 ARCHIVE
-         '---'
-  `;
-
-  console.log("%c" + asciiEye, "color: #ffd56b; font-family: monospace; font-weight: bold;");
-  console.log(
-    "%c[!] WARNING: Unregistered terminal connection detected.%c\n" +
-    "Frequency: 142.857 MHz\n" +
-    "Coordinates: 37.2431° N, 115.7930° W\n" +
-    "Cipher hint: What sees all from the top of the pyramid?",
-    "color: #ff3366; font-weight: bold; font-size: 13px;",
-    "color: #d4af37; font-family: monospace; font-size: 11px;"
-  );
+(function printConsoleClue() {
+  console.log("%c[REC: 2008-11-04 // CAM-02]", "color: #ff1111; font-family: monospace; font-size: 13px;");
+  console.log("%cAll seeing eye is active. Don't look away from the screen.", "color: #888; font-family: monospace;");
 })();
