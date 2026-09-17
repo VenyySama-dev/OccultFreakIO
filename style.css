@@ -1,1 +1,667 @@
+/* =============================================================================
+   ARG BACKGROUND IMAGE CONFIGURATION:
+   -----------------------------------------------------------------------------
+   To add or change your background image:
+   Simply set the '--bg-image' property below to your image's path or URL!
+   
+   Examples:
+     --bg-image: url('assets/bg-occult.jpg');
+     --bg-image: url('assets/my-creepy-room.png');
+     --bg-image: url('https://example.com/arg-chapter-one.jpg');
+     --bg-image: none;  (Uses the dark mystic gradient instead)
 
+   You can also fine-tune the opacity and blur right here:
+   ============================================================================= */
+:root {
+  /* YOUR BACKGROUND IMAGE HERE: */
+  --bg-image: url('assets/bg-occult.jpg');
+  --bg-opacity: 0.38;          /* 0.0 (completely invisible) to 1.0 (fully visible) */
+  --bg-blur: 0px;              /* Blur filter (e.g. 0px, 2px, 5px) */
+  --bg-scale: 1.05;            /* Slight zoom for atmospheric parallax */
+
+  /* ARG COLOR PALETTE */
+  --color-bg-base: #07070b;
+  --color-surface: rgba(13, 14, 22, 0.85);
+  --color-surface-card: rgba(16, 17, 28, 0.78);
+  --color-gold: #d4af37;
+  --color-gold-bright: #ffd56b;
+  --color-gold-glow: rgba(212, 175, 55, 0.45);
+  --color-crimson: #ff3366;
+  --color-crimson-glow: rgba(255, 51, 102, 0.5);
+  --color-cyan: #00f0ff;
+  --color-cyan-glow: rgba(0, 240, 255, 0.4);
+  --color-text-main: #f3efe6;
+  --color-text-muted: #8b899c;
+  --color-text-dim: #545263;
+
+  /* TYPOGRAPHY */
+  --font-display: 'Cinzel Decorative', 'Cinzel', serif;
+  --font-serif: 'Cinzel', serif;
+  --font-terminal: 'Space Mono', monospace, monospace;
+
+  /* TRANSITIONS & SHADOWS */
+  --card-shadow: 0 20px 60px -15px rgba(0, 0, 0, 0.95), 0 0 45px rgba(212, 175, 55, 0.12);
+  --input-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.8), 0 0 20px rgba(212, 175, 55, 0.2);
+}
+
+/* Base Reset */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  width: 100%;
+  min-height: 100vh;
+  background-color: var(--color-bg-base);
+  color: var(--color-text-main);
+  font-family: var(--font-terminal);
+  overflow-x: hidden;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Screen reader utility */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+}
+
+/* =============================================================================
+   ATMOSPHERIC BACKGROUND & OVERLAYS
+   ============================================================================= */
+.bg-layer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: #07070b;
+  background-image: var(--bg-image), radial-gradient(circle at 50% 35%, rgba(55, 30, 75, 0.45) 0%, rgba(18, 14, 28, 0.85) 50%, #07070b 95%);
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
+  opacity: var(--bg-opacity);
+  filter: blur(var(--bg-blur));
+  transform: scale(var(--bg-scale));
+  transition: opacity 0.8s ease, filter 0.8s ease, transform 10s ease-out;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* Deep Occult Vignette Mask */
+.bg-vignette {
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(circle at center, rgba(7, 7, 11, 0.4) 0%, rgba(7, 7, 11, 0.85) 60%, rgba(3, 3, 6, 0.98) 100%);
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* Subtle CRT Scanlines */
+.crt-scanlines {
+  position: fixed;
+  inset: 0;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0px,
+    transparent 2px,
+    rgba(0, 0, 0, 0.28) 3px,
+    rgba(0, 0, 0, 0.28) 4px
+  );
+  opacity: 0.7;
+  z-index: 2;
+  pointer-events: none;
+}
+
+/* Ambient Pulsing Glow */
+.ambient-glow {
+  position: fixed;
+  top: 30%;
+  left: 50%;
+  width: 600px;
+  height: 600px;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(circle, rgba(212, 175, 55, 0.12) 0%, rgba(255, 51, 102, 0.04) 50%, transparent 75%);
+  filter: blur(50px);
+  animation: ambientPulse 8s ease-in-out infinite alternate;
+  z-index: 1;
+  pointer-events: none;
+}
+
+@keyframes ambientPulse {
+  0% { opacity: 0.4; transform: translate(-50%, -50%) scale(0.9); }
+  100% { opacity: 0.9; transform: translate(-50%, -50%) scale(1.15); }
+}
+
+/* =============================================================================
+   TOP BAR
+   ============================================================================= */
+.top-bar {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+  font-size: 0.8rem;
+  letter-spacing: 0.15em;
+  color: var(--color-text-muted);
+  border-bottom: 1px solid rgba(212, 175, 55, 0.15);
+  backdrop-filter: blur(10px);
+  background: rgba(7, 7, 11, 0.6);
+}
+
+.status-indicator {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: var(--color-gold);
+  box-shadow: 0 0 10px var(--color-gold-bright);
+  animation: blinkStatus 2.2s infinite;
+}
+
+@keyframes blinkStatus {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.3; transform: scale(0.85); }
+}
+
+.sound-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(212, 175, 55, 0.08);
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  color: var(--color-text-muted);
+  padding: 0.35rem 0.8rem;
+  font-family: var(--font-terminal);
+  font-size: 0.75rem;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.sound-btn:hover {
+  background: rgba(212, 175, 55, 0.2);
+  color: var(--color-gold-bright);
+  border-color: var(--color-gold-bright);
+  box-shadow: 0 0 12px var(--color-gold-glow);
+}
+
+.sound-icon.hidden {
+  display: none;
+}
+
+/* =============================================================================
+   MAIN VIEWPORT & OCCULT CARD
+   ============================================================================= */
+.viewport-wrapper {
+  position: relative;
+  z-index: 10;
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem 1.25rem;
+}
+
+.occult-card {
+  position: relative;
+  width: 100%;
+  max-width: 620px;
+  background: var(--color-surface-card);
+  border: 1px solid var(--color-border-glow, rgba(212, 175, 55, 0.28));
+  border-radius: 6px;
+  padding: 2.8rem 2.4rem 2.2rem;
+  box-shadow: var(--card-shadow);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  text-align: center;
+  transition: border-color 0.4s ease, box-shadow 0.4s ease;
+  overflow: hidden;
+}
+
+.occult-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--color-gold), transparent);
+}
+
+/* Corner Sigils */
+.corner-sigil {
+  position: absolute;
+  font-size: 1.15rem;
+  color: var(--color-gold);
+  opacity: 0.4;
+  pointer-events: none;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.occult-card:hover .corner-sigil {
+  opacity: 0.85;
+  text-shadow: 0 0 8px var(--color-gold-glow);
+}
+
+.corner-sigil.top-left { top: 12px; left: 14px; }
+.corner-sigil.top-right { top: 12px; right: 14px; }
+.corner-sigil.bottom-left { bottom: 12px; left: 14px; }
+.corner-sigil.bottom-right { bottom: 12px; right: 14px; }
+
+/* =============================================================================
+   ALL SEEING EYE - SACRED GEOMETRY EMBLEM
+   ============================================================================= */
+.eye-symbol-wrapper {
+  margin: 0 auto 1.2rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+
+.sacred-eye-svg {
+  filter: drop-shadow(0 0 16px rgba(212, 175, 55, 0.35));
+  overflow: visible;
+  transition: filter 0.4s ease;
+}
+
+.sacred-ring {
+  fill: none;
+  stroke: var(--color-gold);
+  stroke-width: 0.8;
+  opacity: 0.4;
+  transform-origin: 100px 100px;
+}
+
+.sacred-ring.outer-ring {
+  stroke-dasharray: 4 6;
+  animation: rotateClockwise 45s linear infinite;
+}
+
+.sacred-ring.middle-ring {
+  stroke-dasharray: 12 8;
+  opacity: 0.25;
+  animation: rotateCounterClockwise 35s linear infinite;
+}
+
+.sacred-ring.inner-ring {
+  opacity: 0.35;
+}
+
+@keyframes rotateClockwise {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes rotateCounterClockwise {
+  from { transform: rotate(360deg); }
+  to { transform: rotate(0deg); }
+}
+
+.sacred-triangle {
+  fill: none;
+  stroke: var(--color-gold);
+  stroke-width: 1.2;
+  opacity: 0.75;
+}
+
+.sacred-triangle.secondary-tri {
+  stroke-dasharray: 5 5;
+  opacity: 0.4;
+}
+
+.eye-contour {
+  fill: rgba(10, 11, 18, 0.9);
+  stroke: var(--color-gold-bright);
+  stroke-width: 2.2;
+}
+
+.eye-iris {
+  fill: #151829;
+  stroke: var(--color-gold);
+  stroke-width: 1.8;
+  filter: drop-shadow(0 0 6px var(--color-gold));
+}
+
+.eye-pupil {
+  fill: #000;
+  stroke: var(--color-crimson);
+  stroke-width: 1.2;
+}
+
+.eye-glint {
+  fill: #ffffff;
+  opacity: 0.9;
+}
+
+.apex-ray {
+  stroke: var(--color-gold);
+  stroke-width: 1.2;
+  stroke-dasharray: 3 3;
+  opacity: 0.5;
+}
+
+/* =============================================================================
+   MANDATORY TITLE: "All seeing eye"
+   ============================================================================= */
+.header-container {
+  margin-bottom: 2rem;
+}
+
+.pre-title {
+  font-family: var(--font-terminal);
+  font-size: 0.72rem;
+  letter-spacing: 0.28em;
+  color: var(--color-gold);
+  opacity: 0.8;
+  margin-bottom: 0.4rem;
+}
+
+.main-title {
+  font-family: var(--font-display);
+  font-size: 2.5rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-text-main);
+  text-shadow: 0 0 20px var(--color-gold-glow), 0 0 40px rgba(212, 175, 55, 0.2);
+  line-height: 1.15;
+  margin-bottom: 0.5rem;
+  position: relative;
+  display: inline-block;
+}
+
+.instruction-text {
+  font-family: var(--font-serif);
+  font-size: 0.95rem;
+  letter-spacing: 0.08em;
+  color: var(--color-text-muted);
+}
+
+/* =============================================================================
+   PASSWORD BOX (MAIN ARTIFACT ELEMENT)
+   ============================================================================= */
+.password-form {
+  margin-bottom: 1.6rem;
+}
+
+.password-box-container {
+  position: relative;
+}
+
+.input-inner {
+  display: flex;
+  align-items: center;
+  background: rgba(7, 8, 14, 0.95);
+  border: 1px solid rgba(212, 175, 55, 0.4);
+  border-radius: 4px;
+  padding: 0.35rem 0.45rem 0.35rem 1rem;
+  box-shadow: var(--input-shadow);
+  transition: all 0.3s ease;
+}
+
+.input-inner:focus-within {
+  border-color: var(--color-gold-bright);
+  box-shadow: 0 0 25px rgba(212, 175, 55, 0.45), inset 0 2px 12px rgba(0, 0, 0, 0.9);
+}
+
+.prompt-glyph {
+  color: var(--color-gold);
+  font-size: 1.1rem;
+  margin-right: 0.7rem;
+  user-select: none;
+  animation: glyphPulse 1.8s infinite alternate;
+}
+
+@keyframes glyphPulse {
+  0% { opacity: 0.4; text-shadow: none; }
+  100% { opacity: 1; text-shadow: 0 0 8px var(--color-gold-bright); }
+}
+
+.password-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--color-text-main);
+  font-family: var(--font-terminal);
+  font-size: 1.05rem;
+  letter-spacing: 0.12em;
+  padding: 0.6rem 0;
+  min-width: 0;
+}
+
+.password-input::placeholder {
+  color: var(--color-text-dim);
+  font-size: 0.88rem;
+  letter-spacing: 0.1em;
+}
+
+.submit-btn {
+  background: linear-gradient(135deg, #1b1c2b, #12131e);
+  border: 1px solid rgba(212, 175, 55, 0.5);
+  color: var(--color-gold-bright);
+  font-family: var(--font-terminal);
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  padding: 0.75rem 1.4rem;
+  border-radius: 3px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.submit-btn:hover {
+  background: linear-gradient(135deg, rgba(212, 175, 55, 0.3), rgba(212, 175, 55, 0.15));
+  border-color: var(--color-gold-bright);
+  color: #ffffff;
+  box-shadow: 0 0 20px var(--color-gold-glow);
+  transform: translateY(-1px);
+}
+
+.submit-btn:active {
+  transform: translateY(1px);
+}
+
+/* =============================================================================
+   TERMINAL OUTPUT LOG
+   ============================================================================= */
+.terminal-container {
+  background: rgba(5, 5, 8, 0.85);
+  border: 1px solid rgba(212, 175, 55, 0.18);
+  border-radius: 4px;
+  text-align: left;
+  margin-bottom: 1.4rem;
+  overflow: hidden;
+}
+
+.terminal-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(18, 19, 30, 0.8);
+  padding: 0.45rem 0.8rem;
+  font-size: 0.7rem;
+  letter-spacing: 0.15em;
+  border-bottom: 1px solid rgba(212, 175, 55, 0.12);
+  color: var(--color-text-muted);
+}
+
+.terminal-attempts {
+  color: var(--color-gold);
+  font-weight: bold;
+}
+
+.terminal-display {
+  padding: 0.9rem;
+  min-height: 90px;
+  max-height: 180px;
+  overflow-y: auto;
+  font-size: 0.82rem;
+  line-height: 1.55;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+/* Terminal Custom Scrollbar */
+.terminal-display::-webkit-scrollbar {
+  width: 4px;
+}
+.terminal-display::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.3);
+}
+.terminal-display::-webkit-scrollbar-thumb {
+  background: rgba(212, 175, 55, 0.3);
+  border-radius: 2px;
+}
+
+.term-row {
+  word-break: break-word;
+  animation: fadeInRow 0.25s ease-out;
+}
+
+@keyframes fadeInRow {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.term-row.ready {
+  color: var(--color-cyan);
+}
+
+.term-row.hint {
+  color: var(--color-text-dim);
+  font-style: italic;
+}
+
+.term-row.denied {
+  color: var(--color-crimson);
+  text-shadow: 0 0 8px var(--color-crimson-glow);
+}
+
+.term-row.granted {
+  color: var(--color-gold-bright);
+  text-shadow: 0 0 10px var(--color-gold-glow);
+  font-weight: bold;
+}
+
+.term-row.clue {
+  color: #9ef0ff;
+  border-left: 2px solid var(--color-cyan);
+  padding-left: 0.5rem;
+  margin-top: 0.2rem;
+}
+
+/* Shake / Glitch on Error */
+.shake-card {
+  animation: cardGlitch 0.45s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+  border-color: var(--color-crimson) !important;
+  box-shadow: 0 0 40px var(--color-crimson-glow) !important;
+}
+
+@keyframes cardGlitch {
+  10%, 90% { transform: translate3d(-2px, 0, 0); }
+  20%, 80% { transform: translate3d(4px, 0, 0); }
+  30%, 50%, 70% { transform: translate3d(-6px, 0, 0); }
+  40%, 60% { transform: translate3d(6px, 0, 0); }
+}
+
+/* Radiance on Unlock */
+.unlocked-card {
+  border-color: var(--color-gold-bright) !important;
+  box-shadow: 0 0 60px rgba(255, 213, 107, 0.55), inset 0 0 30px rgba(212, 175, 55, 0.25) !important;
+}
+
+/* =============================================================================
+   CARD FOOTER
+   ============================================================================= */
+.card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 0.9rem;
+  border-top: 1px solid rgba(212, 175, 55, 0.12);
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  color: var(--color-text-dim);
+}
+
+.status-tag {
+  color: var(--color-crimson);
+  font-weight: bold;
+}
+
+.status-tag.unlocked {
+  color: var(--color-gold-bright);
+  text-shadow: 0 0 8px var(--color-gold-glow);
+}
+
+.coordinates-tag {
+  cursor: help;
+  transition: color 0.25s;
+}
+
+.coordinates-tag:hover {
+  color: var(--color-gold);
+}
+
+/* =============================================================================
+   RESPONSIVE LAYOUT
+   ============================================================================= */
+@media (max-width: 640px) {
+  .top-bar {
+    padding: 0.8rem 1rem;
+    font-size: 0.7rem;
+  }
+  .occult-card {
+    padding: 2rem 1.25rem 1.6rem;
+  }
+  .main-title {
+    font-size: 1.8rem;
+  }
+  .sacred-eye-svg {
+    width: 130px;
+    height: 130px;
+  }
+  .input-inner {
+    flex-direction: column;
+    padding: 0.6rem;
+    gap: 0.6rem;
+  }
+  .password-input {
+    width: 100%;
+    text-align: center;
+  }
+  .prompt-glyph {
+    display: none;
+  }
+  .submit-btn {
+    width: 100%;
+  }
+  .card-footer {
+    flex-direction: column;
+    gap: 0.4rem;
+    text-align: center;
+  }
+}

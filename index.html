@@ -2,15 +2,171 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>ARCHIVE // 404</title>
-  <!-- ARG Clue: Hidden in the metadata -->
-  <meta name="clue-frequency" content="142.857">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OCCULT // ALL SEEING EYE</title>
+  
+  <!-- ARG METADATA CLUES FOR INVESTIGATORS -->
+  <meta name="clue-frequency" content="142.857 MHz">
+  <meta name="sigil-coordinates" content="37.2431 N, 115.7930 W">
+  <meta name="cipher-shift" content="rot-13: gurl ner jngpuvat lbh">
+  <meta name="node-id" content="NODE-404-ARCHIVE">
+  <meta name="description" content="All seeing eye authentication portal. Sub-sector 9 cryptographic terminal.">
+
+  <!-- Favicon Sigil -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>👁️</text></svg>">
+
+  <!-- Typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700;900&family=Cinzel:wght@600;700;800&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+  
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h1>Access Restricted</h1>
-  <p>Enter valid credentials or return to terminal.</p>
-  <!-- HTML comment clue: Coordinates 37.2431 N, 115.7930 W -->
+  <!-- Atmospheric Overlays & Dynamic Background -->
+  <div id="bg-layer" class="bg-layer" aria-hidden="true"></div>
+  <div class="bg-vignette" aria-hidden="true"></div>
+  <div class="crt-scanlines" aria-hidden="true"></div>
+  <div class="ambient-glow" aria-hidden="true"></div>
+
+  <!-- Top Status Bar -->
+  <header class="top-bar">
+    <div class="status-indicator">
+      <span class="status-dot"></span>
+      <span class="status-text">NODE 404 // OCCULT FREAK IO</span>
+    </div>
+    <div class="top-controls">
+      <button id="sound-toggle-btn" class="sound-btn" aria-label="Toggle Audio Feedback" title="Toggle audio synthesizer">
+        <svg id="sound-icon-off" class="sound-icon" viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+          <path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/>
+        </svg>
+        <svg id="sound-icon-on" class="sound-icon hidden" viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+          <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
+        </svg>
+        <span id="sound-label">AUDIO: MUTED</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Central ARG Portal Card -->
+  <main class="viewport-wrapper">
+    <section class="occult-card" id="occult-card">
+      <div class="card-border-glow"></div>
+      
+      <!-- Corner Sigil Accents -->
+      <span class="corner-sigil top-left">🜁</span>
+      <span class="corner-sigil top-right">🜂</span>
+      <span class="corner-sigil bottom-left">🜃</span>
+      <span class="corner-sigil bottom-right">🜄</span>
+
+      <!-- Sacred Geometry "All Seeing Eye" Emblem -->
+      <div class="eye-symbol-wrapper" id="eye-wrapper">
+        <svg class="sacred-eye-svg" viewBox="0 0 200 200" width="180" height="180" aria-label="Sacred Geometry Eye of Providence">
+          <defs>
+            <radialGradient id="eyeAuraGlow" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="#ffd56b" stop-opacity="0.65" />
+              <stop offset="60%" stop-color="#d4af37" stop-opacity="0.2" />
+              <stop offset="100%" stop-color="#000000" stop-opacity="0" />
+            </radialGradient>
+            <filter id="sigilGlow" x="-20%" y="-20%" width="140%" height="140%">
+              <feGaussianBlur stdDeviation="3" result="blur" />
+              <feComposite in="SourceGraphic" in2="blur" operator="over" />
+            </filter>
+          </defs>
+
+          <!-- Rotating Rings & Sacred Geometry -->
+          <circle cx="100" cy="100" r="92" class="sacred-ring outer-ring" />
+          <circle cx="100" cy="100" r="82" class="sacred-ring middle-ring" />
+          <circle cx="100" cy="100" r="68" class="sacred-ring inner-ring" />
+
+          <!-- Sacred Triangles -->
+          <polygon points="100,14 178,154 22,154" class="sacred-triangle primary-tri" />
+          <polygon points="100,28 168,148 32,148" class="sacred-triangle secondary-tri" />
+
+          <!-- Background Aura -->
+          <circle cx="100" cy="108" r="44" fill="url(#eyeAuraGlow)" />
+
+          <!-- The Eye Contour -->
+          <path d="M 38,108 Q 100,52 162,108 Q 100,164 38,108 Z" class="eye-contour" filter="url(#sigilGlow)" />
+          
+          <!-- Eye Pupil and Iris (Interactive Tracking) -->
+          <g id="interactive-pupil-group">
+            <circle cx="100" cy="108" r="22" class="eye-iris" />
+            <circle cx="100" cy="108" r="9.5" class="eye-pupil" />
+            <circle cx="96" cy="104" r="3.5" class="eye-glint" />
+          </g>
+
+          <!-- Radiating Apex Light Ray -->
+          <line x1="100" y1="14" x2="100" y2="0" class="apex-ray" />
+          <line x1="178" y1="154" x2="190" y2="164" class="apex-ray" />
+          <line x1="22" y1="154" x2="10" y2="164" class="apex-ray" />
+        </svg>
+      </div>
+
+      <!-- Header: "All seeing eye" (Positioned directly above the password box) -->
+      <div class="header-container">
+        <div class="pre-title">// TRANSMISSION CHANNEL //</div>
+        <h1 class="main-title" data-text="All seeing eye">All seeing eye</h1>
+        <p class="instruction-text">Speak the cipher key to unseal the archive</p>
+      </div>
+
+      <!-- Password Input Form -->
+      <form id="password-form" class="password-form" spellcheck="false" autocomplete="off">
+        <div class="password-box-container">
+          <label for="password-input" class="sr-only">Password or Cipher Key</label>
+          <div class="input-inner">
+            <span class="prompt-glyph">⚡</span>
+            <input 
+              type="text" 
+              id="password-input" 
+              class="password-input" 
+              placeholder="ENTER CIPHER KEY..." 
+              autocomplete="off" 
+              autocapitalize="off" 
+              autofocus 
+              required
+            >
+            <button type="submit" id="submit-btn" class="submit-btn" aria-label="Submit Cipher">
+              <span class="btn-text">DECIPHER</span>
+              <span class="btn-border-glow"></span>
+            </button>
+          </div>
+        </div>
+      </form>
+
+      <!-- Terminal Output Log -->
+      <div class="terminal-container">
+        <div class="terminal-bar">
+          <span class="terminal-title">&gt; DECRYPTION TERMINAL</span>
+          <span class="terminal-attempts" id="attempts-badge">ATTEMPTS: 0</span>
+        </div>
+        <div class="terminal-display" id="terminal-display" aria-live="polite">
+          <div class="term-row ready">&gt; SYSTEM INITIALIZED. Awaiting passphrase...</div>
+          <div class="term-row hint">&gt; Hint: The eye beholds what is hidden in plain sight.</div>
+        </div>
+      </div>
+
+      <!-- Card Footer Clues -->
+      <footer class="card-footer">
+        <span class="status-tag" id="status-tag">STATUS: LOCKED</span>
+        <span class="coordinates-tag" title="Fragment coordinates">COORD: 37.2431°N, 115.7930°W</span>
+      </footer>
+
+    </section>
+  </main>
+
+  <!-- ARG Clue Comment:
+       ========================================================================
+       CLUE FRAGMENT #1:
+       "Those who search shall find the frequency: 142.857 MHz."
+       Default secret keys configured in script.js:
+         - "eye"
+         - "ouroboros"
+         - "freak"
+       You can add or customize your own passwords in script.js!
+       ========================================================================
+  -->
+
   <script src="script.js"></script>
 </body>
 </html>
