@@ -8,24 +8,15 @@ const ARG_CONFIG = {
   // By default, it uses '--bg-image' in style.css.
   backgroundImage: "",
 
-  // Passwords and outcomes (all case-insensitive)
+  // Active Hint:
+  hint: "What Occult Freak is going through",
+
+  // Passwords and outcomes (case-insensitive)
   passwords: {
-    "eye": {
+    "splitpersonality": {
       title: "ACCESS GRANTED",
-      message: "The eye has seen you. Tape 04 unsealed.",
-      clue: "Seek frequency 142.857 MHz. Coordinates: 37.2431 N, 115.7930 W. Next keyword: 'ouroboros'",
-      redirectUrl: null
-    },
-    "ouroboros": {
-      title: "LOOP RECOGNIZED",
-      message: "The tape restarts itself. It never ended.",
-      clue: "Check the source code metadata for the date of the incident.",
-      redirectUrl: null
-    },
-    "freak": {
-      title: "CONNECTION ESTABLISHED",
-      message: "You are not the first to find this camera.",
-      clue: "Archive fragment: 'Don't look back into the hallway.'",
+      message: "The fracture is recognized. Two minds, one vessel.",
+      clue: "Archive unlocked: 'What Occult Freak is going through.' The other side has awakened.",
       redirectUrl: null
     }
   },
@@ -393,6 +384,11 @@ window.submitPassword = function() {
     errLine.className = "log-line error";
     errLine.textContent = `> ${randomErr}`;
     output.appendChild(errLine);
+
+    const hintLine = document.createElement("div");
+    hintLine.className = "log-line clue";
+    hintLine.textContent = `hint: ${ARG_CONFIG.hint}`;
+    output.appendChild(hintLine);
   }
 
   input.value = "";
@@ -438,4 +434,4 @@ if (document.readyState === "loading") {
   initApp();
 }
 
-console.log("[REC: 2008-11-04 // CAM-02] All seeing eye initialized. Passwords: 'eye', 'ouroboros', 'freak'");
+console.log("[REC: 2008-11-04 // CAM-02] All seeing eye initialized. Hint: 'What Occult Freak is going through'");
