@@ -19,20 +19,20 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <!-- Dynamic Background Layer (Configurable easily in style.css or script.js) -->
+  <!-- Dynamic Background Layer (Configurable in style.css or script.js) -->
   <div id="bg-layer" class="bg-layer" aria-hidden="true"></div>
 
-  <!-- Animated Analog Noise & Grime Canvas -->
+  <!-- Animated Analog Static Noise Canvas -->
   <canvas id="noise-canvas" class="noise-canvas" aria-hidden="true"></canvas>
 
-  <!-- 2008 Camcorder / Horror HUD -->
+  <!-- 2008 Camcorder / VHS HUD -->
   <header class="hud-top">
     <div class="rec-indicator">
       <span class="rec-dot"></span>
       <span class="rec-text">REC [00:04:18]</span>
     </div>
     <div class="tape-meta">
-      <button id="sound-btn" class="hud-btn" type="button" title="Toggle audio">[ audio: muted ]</button>
+      <button id="sound-btn" class="hud-btn" type="button" onclick="window.toggleAudio && window.toggleAudio()" title="Toggle audio">[ audio: muted ]</button>
     </div>
   </header>
 
@@ -42,9 +42,7 @@
     <!-- Unsettling Staring Eye Glyph -->
     <div class="eye-symbol" id="eye-container" aria-hidden="true">
       <svg viewBox="0 0 120 70" width="110" height="65" class="eye-svg">
-        <!-- Eerie simple eye outline -->
         <path d="M 10 35 Q 60 5 110 35 Q 60 65 10 35 Z" class="eye-shape" />
-        <!-- Iris & Dilated Pupil -->
         <g id="pupil-group">
           <circle cx="60" cy="35" r="15" class="iris-circle" />
           <circle cx="60" cy="35" r="7" class="pupil-circle" />
@@ -56,13 +54,14 @@
     <!-- Mandatory Text: "All seeing eye" -->
     <h1 class="horror-title" id="horror-title">All seeing eye</h1>
 
-    <!-- Simple Password Form -->
-    <form id="password-form" class="simple-password-form" autocomplete="off" spellcheck="false">
+    <!-- Simple Password Form (onsubmit="return false;" prevents unwanted page reloads) -->
+    <form id="password-form" class="simple-password-form" onsubmit="window.submitPassword && window.submitPassword(); return false;" autocomplete="off" spellcheck="false">
       <div class="input-box-row">
         <span class="prompt-arrow">&gt;</span>
         <input 
           type="text" 
           id="password-input" 
+          name="cipher"
           class="simple-password-input" 
           placeholder="enter password..." 
           autocomplete="off" 
@@ -70,7 +69,7 @@
           autofocus 
           required 
         />
-        <button type="submit" id="submit-btn" class="simple-submit-btn">[ submit ]</button>
+        <button type="submit" id="submit-btn" class="simple-submit-btn" onclick="window.submitPassword && window.submitPassword()">[ submit ]</button>
       </div>
     </form>
 

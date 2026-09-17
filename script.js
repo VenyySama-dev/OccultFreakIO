@@ -5,18 +5,15 @@
    ============================================================================= */
 const ARG_CONFIG = {
   // Optional background image override in JavaScript.
-  // By default, it uses the '--bg-image' in style.css.
+  // By default, it uses '--bg-image' in style.css.
   backgroundImage: "",
 
-  // Sound enabled by default (toggle via [ audio: muted ] in the corner)
-  soundEnabled: false,
-
-  // Passwords and riddles (case-insensitive)
+  // Passwords and outcomes (all case-insensitive)
   passwords: {
     "eye": {
       title: "ACCESS GRANTED",
       message: "The eye has seen you. Tape 04 unsealed.",
-      clue: "Seek frequency 142.857 MHz. Coordinates: 37.2431 N, 115.7930 W. Next word: 'ouroboros'",
+      clue: "Seek frequency 142.857 MHz. Coordinates: 37.2431 N, 115.7930 W. Next keyword: 'ouroboros'",
       redirectUrl: null
     },
     "ouroboros": {
@@ -33,7 +30,7 @@ const ARG_CONFIG = {
     }
   },
 
-  // Randomized error messages when a wrong password is typed:
+  // Error messages on invalid password:
   errorMessages: [
     "access denied.",
     "invalid cipher key.",
@@ -44,93 +41,28 @@ const ARG_CONFIG = {
 };
 
 /* =============================================================================
-   EASY BACKGROUND INITIALIZATION
-   ============================================================================= */
-(function initBackground() {
-  if (ARG_CONFIG.backgroundImage && ARG_CONFIG.backgroundImage.trim() !== "") {
-    const bg = document.getElementById("bg-layer");
-    if (bg) {
-      bg.style.backgroundImage = `url('${ARG_CONFIG.backgroundImage}')`;
-    }
-  }
-})();
-
-/* =============================================================================
-   2008 ANALOG STATIC NOISE ENGINE (CANVAS)
-   Generates authentic gritty TV / CCD sensor grain at 22 fps.
-   ============================================================================= */
-(function initNoiseCanvas() {
-  const canvas = document.getElementById("noise-canvas");
-  if (!canvas) return;
-  const ctx = canvas.getContext("2d");
-  if (!ctx) return;
-
-  // Offscreen low-res buffer for genuine 2008 retro pixelated noise
-  const bufferWidth = 240;
-  const bufferHeight = 160;
-  const offscreen = document.createElement("canvas");
-  offscreen.width = bufferWidth;
-  offscreen.height = bufferHeight;
-  const offCtx = offscreen.getContext("2d");
-  const imgData = offCtx.createImageData(bufferWidth, bufferHeight);
-  const buffer32 = new Uint32Array(imgData.data.buffer);
-
-  function resizeCanvas() {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-  }
-  window.addEventListener("resize", resizeCanvas);
-  resizeCanvas();
-
-  let lastFrame = 0;
-  const fpsInterval = 1000 / 22; // 22 fps analog grain jitter
-
-  function renderNoise(timestamp) {
-    requestAnimationFrame(renderNoise);
-
-    const elapsed = timestamp - lastFrame;
-    if (elapsed < fpsInterval) return;
-    lastFrame = timestamp - (elapsed % fpsInterval);
-
-    const len = buffer32.length;
-    for (let i = 0; i < len; i++) {
-      // Gritty monochrome grain with occasional speckle
-      const val = (Math.random() * 255) | 0;
-      buffer32[i] = (255 << 24) | (val << 16) | (val << 8) | val;
-    }
-
-    offCtx.putImageData(imgData, 0, 0);
-
-    // Blit scaled noise to full screen canvas
-    ctx.imageSmoothingEnabled = false;
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.drawImage(offscreen, 0, 0, canvas.width, canvas.height);
-  }
-
-  requestAnimationFrame(renderNoise);
-})();
-
-/* =============================================================================
-   SYNTHESIZED 2008 HORROR AUDIO ENGINE
-   Tape drone, static hiss, and mechanical keystrokes.
+   SAFE AUDIO ENGINE (Zero dependencies, won't throw if blocked)
    ============================================================================= */
 class HorrorAudioEngine {
   constructor() {
     this.ctx = null;
-    this.enabled = ARG_CONFIG.soundEnabled;
+    this.enabled = false;
     this.noiseNode = null;
-    this.noiseGain = null;
   }
 
   ensureContext() {
-    if (!this.ctx) {
-      const AudioContext = window.AudioContext || window.webkitAudioContext;
-      if (AudioContext) {
-        this.ctx = new AudioContext();
+    try {
+      if (!this.ctx) {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (AudioContext) {
+          this.ctx = new AudioContext();
+        }
       }
-    }
-    if (this.ctx && this.ctx.state === "suspended") {
-      this.ctx.resume();
+      if (this.ctx && this.ctx.state === "suspended") {
+        this.ctx.resume();
+      }
+    } catch (e) {
+      console.warn("AudioContext unavailable:", e);
     }
   }
 
@@ -140,7 +72,7 @@ class HorrorAudioEngine {
 
     if (this.enabled) {
       this.startTapeHiss();
-      this.playTone(300, 0.08, "square", 0.05);
+      this.playTone(320, 0.08, "square", 0.04);
     } else {
       this.stopTapeHiss();
     }
@@ -148,36 +80,35 @@ class HorrorAudioEngine {
   }
 
   startTapeHiss() {
-    if (!this.ctx || this.noiseNode) return;
+    try {
+      if (!this.ctx || this.noiseNode) return;
 
-    // Generate gentle background tape static buffer
-    const bufferSize = this.ctx.sampleRate * 2;
-    const noiseBuffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
-    const output = noiseBuffer.getChannelData(0);
-    for (let i = 0; i < bufferSize; i++) {
-      output[i] = Math.random() * 2 - 1;
-    }
+      const bufferSize = this.ctx.sampleRate * 2;
+      const noiseBuffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+      const output = noiseBuffer.getChannelData(0);
+      for (let i = 0; i < bufferSize; i++) {
+        output[i] = Math.random() * 2 - 1;
+      }
 
-    const whiteNoise = this.ctx.createBufferSource();
-    whiteNoise.buffer = noiseBuffer;
-    whiteNoise.loop = true;
+      const whiteNoise = this.ctx.createBufferSource();
+      whiteNoise.buffer = noiseBuffer;
+      whiteNoise.loop = true;
 
-    // Filter to sound like low tape hiss / rumble
-    const filter = this.ctx.createBiquadFilter();
-    filter.type = "bandpass";
-    filter.frequency.value = 800;
-    filter.Q.value = 1.0;
+      const filter = this.ctx.createBiquadFilter();
+      filter.type = "bandpass";
+      filter.frequency.value = 850;
+      filter.Q.value = 1.0;
 
-    const gain = this.ctx.createGain();
-    gain.gain.setValueAtTime(0.012, this.ctx.currentTime);
+      const gain = this.ctx.createGain();
+      gain.gain.setValueAtTime(0.015, this.ctx.currentTime);
 
-    whiteNoise.connect(filter);
-    filter.connect(gain);
-    gain.connect(this.ctx.destination);
+      whiteNoise.connect(filter);
+      filter.connect(gain);
+      gain.connect(this.ctx.destination);
 
-    whiteNoise.start();
-    this.noiseNode = whiteNoise;
-    this.noiseGain = gain;
+      whiteNoise.start();
+      this.noiseNode = whiteNoise;
+    } catch (e) {}
   }
 
   stopTapeHiss() {
@@ -187,7 +118,6 @@ class HorrorAudioEngine {
         this.noiseNode.disconnect();
       } catch (e) {}
       this.noiseNode = null;
-      this.noiseGain = null;
     }
   }
 
@@ -196,45 +126,49 @@ class HorrorAudioEngine {
     this.ensureContext();
     if (!this.ctx) return;
 
-    const osc = this.ctx.createOscillator();
-    const gain = this.ctx.createGain();
-    const now = this.ctx.currentTime;
+    try {
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      const now = this.ctx.currentTime;
 
-    osc.type = "triangle";
-    osc.frequency.setValueAtTime(450 + Math.random() * 150, now);
-    osc.frequency.exponentialRampToValueAtTime(100, now + 0.025);
+      osc.type = "triangle";
+      osc.frequency.setValueAtTime(400 + Math.random() * 200, now);
+      osc.frequency.exponentialRampToValueAtTime(80, now + 0.025);
 
-    gain.gain.setValueAtTime(0.04, now);
-    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.025);
+      gain.gain.setValueAtTime(0.05, now);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.025);
 
-    osc.connect(gain);
-    gain.connect(this.ctx.destination);
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
 
-    osc.start(now);
-    osc.stop(now + 0.03);
+      osc.start(now);
+      osc.stop(now + 0.03);
+    } catch (e) {}
   }
 
-  playDenialDistortion() {
+  playDenialBuzz() {
     if (!this.enabled) return;
     this.ensureContext();
     if (!this.ctx) return;
 
-    const now = this.ctx.currentTime;
-    const osc = this.ctx.createOscillator();
-    const gain = this.ctx.createGain();
+    try {
+      const now = this.ctx.currentTime;
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
 
-    osc.type = "sawtooth";
-    osc.frequency.setValueAtTime(90, now);
-    osc.frequency.linearRampToValueAtTime(50, now + 0.3);
+      osc.type = "sawtooth";
+      osc.frequency.setValueAtTime(95, now);
+      osc.frequency.linearRampToValueAtTime(45, now + 0.35);
 
-    gain.gain.setValueAtTime(0.15, now);
-    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.3);
+      gain.gain.setValueAtTime(0.12, now);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.35);
 
-    osc.connect(gain);
-    gain.connect(this.ctx.destination);
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
 
-    osc.start(now);
-    osc.stop(now + 0.32);
+      osc.start(now);
+      osc.stop(now + 0.36);
+    } catch (e) {}
   }
 
   playSuccessDrone() {
@@ -242,172 +176,266 @@ class HorrorAudioEngine {
     this.ensureContext();
     if (!this.ctx) return;
 
-    const freqs = [164.81, 196.00, 246.94]; // E minor chord
-    const now = this.ctx.currentTime;
+    try {
+      const freqs = [164.81, 196.00, 246.94];
+      const now = this.ctx.currentTime;
 
-    freqs.forEach(freq => {
+      freqs.forEach(freq => {
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(freq, now);
+
+        gain.gain.setValueAtTime(0.001, now);
+        gain.gain.linearRampToValueAtTime(0.04, now + 0.2);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + 2.4);
+
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+
+        osc.start(now);
+        osc.stop(now + 2.5);
+      });
+    } catch (e) {}
+  }
+
+  playTone(freq, duration, type = "sine", volume = 0.05) {
+    if (!this.ctx) return;
+    try {
+      const now = this.ctx.currentTime;
       const osc = this.ctx.createOscillator();
       const gain = this.ctx.createGain();
 
-      osc.type = "sine";
+      osc.type = type;
       osc.frequency.setValueAtTime(freq, now);
 
-      gain.gain.setValueAtTime(0.001, now);
-      gain.gain.linearRampToValueAtTime(0.05, now + 0.2);
-      gain.gain.exponentialRampToValueAtTime(0.0001, now + 2.5);
+      gain.gain.setValueAtTime(volume, now);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
 
       osc.connect(gain);
       gain.connect(this.ctx.destination);
 
       osc.start(now);
-      osc.stop(now + 2.6);
-    });
-  }
-
-  playTone(freq, duration, type = "sine", volume = 0.05) {
-    if (!this.ctx) return;
-    const now = this.ctx.currentTime;
-    const osc = this.ctx.createOscillator();
-    const gain = this.ctx.createGain();
-
-    osc.type = type;
-    osc.frequency.setValueAtTime(freq, now);
-
-    gain.gain.setValueAtTime(volume, now);
-    gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
-
-    osc.connect(gain);
-    gain.connect(this.ctx.destination);
-
-    osc.start(now);
-    osc.stop(now + duration);
+      osc.stop(now + duration);
+    } catch (e) {}
   }
 }
 
 const audio = new HorrorAudioEngine();
 
 /* =============================================================================
-   PUPIL CURSOR TRACKING (SUBTLE & UNSETTLING)
+   SAFE 2008 ANALOG STATIC NOISE CANVAS
    ============================================================================= */
-(function initPupil() {
-  const pupilGroup = document.getElementById("pupil-group");
-  const eye = document.getElementById("eye-container");
-  if (!pupilGroup || !eye) return;
+(function initNoiseCanvas() {
+  try {
+    const canvas = document.getElementById("noise-canvas");
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
 
-  function movePupil(clientX, clientY) {
-    const rect = eye.getBoundingClientRect();
-    const centerX = rect.left + rect.width / 2;
-    const centerY = rect.top + rect.height / 2;
-
-    const dx = clientX - centerX;
-    const dy = clientY - centerY;
-    const angle = Math.atan2(dy, dx);
-    const dist = Math.min(6, Math.hypot(dx, dy) / 25);
-
-    const x = Math.cos(angle) * dist;
-    const y = Math.sin(angle) * dist;
-
-    pupilGroup.style.transform = `translate(${x}px, ${y}px)`;
-  }
-
-  window.addEventListener("mousemove", e => movePupil(e.clientX, e.clientY));
-  window.addEventListener("touchmove", e => {
-    if (e.touches && e.touches[0]) {
-      movePupil(e.touches[0].clientX, e.touches[0].clientY);
+    function resizeCanvas() {
+      canvas.width = window.innerWidth || 800;
+      canvas.height = window.innerHeight || 600;
     }
-  }, { passive: true });
+    window.addEventListener("resize", resizeCanvas);
+    resizeCanvas();
+
+    const grainWidth = 160;
+    const grainHeight = 100;
+    const offscreen = document.createElement("canvas");
+    offscreen.width = grainWidth;
+    offscreen.height = grainHeight;
+    const offCtx = offscreen.getContext("2d");
+    if (!offCtx) return;
+
+    const imgData = offCtx.createImageData(grainWidth, grainHeight);
+    const data = imgData.data;
+
+    let lastTime = 0;
+    const frameInterval = 1000 / 22; // 22 fps
+
+    function loop(timestamp) {
+      requestAnimationFrame(loop);
+      if (timestamp - lastTime < frameInterval) return;
+      lastTime = timestamp;
+
+      for (let i = 0; i < data.length; i += 4) {
+        const shade = (Math.random() * 255) | 0;
+        data[i] = shade;
+        data[i + 1] = shade;
+        data[i + 2] = shade;
+        data[i + 3] = 255;
+      }
+
+      offCtx.putImageData(imgData, 0, 0);
+
+      if (canvas.width > 0 && canvas.height > 0) {
+        ctx.imageSmoothingEnabled = false;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(offscreen, 0, 0, canvas.width, canvas.height);
+      }
+    }
+
+    requestAnimationFrame(loop);
+  } catch (err) {
+    console.warn("Noise canvas failed to initialize:", err);
+  }
 })();
 
 /* =============================================================================
-   FORM LOGIC & PASSWORD VERIFICATION
+   PUPIL TRACKING
    ============================================================================= */
-document.addEventListener("DOMContentLoaded", () => {
-  const form = document.getElementById("password-form");
-  const input = document.getElementById("password-input");
-  const output = document.getElementById("output-log");
-  const soundBtn = document.getElementById("sound-btn");
-  const container = document.querySelector(".horror-container");
+(function initPupil() {
+  try {
+    const pupilGroup = document.getElementById("pupil-group");
+    const eye = document.getElementById("eye-container");
+    if (!pupilGroup || !eye) return;
 
-  // Audio Toggle
-  soundBtn.addEventListener("click", () => {
-    const isEnabled = audio.toggle();
+    function movePupil(clientX, clientY) {
+      const rect = eye.getBoundingClientRect();
+      const centerX = rect.left + rect.width / 2;
+      const centerY = rect.top + rect.height / 2;
+
+      const dx = clientX - centerX;
+      const dy = clientY - centerY;
+      const angle = Math.atan2(dy, dx);
+      const dist = Math.min(6, Math.hypot(dx, dy) / 25);
+
+      const x = Math.cos(angle) * dist;
+      const y = Math.sin(angle) * dist;
+
+      pupilGroup.style.transform = `translate(${x}px, ${y}px)`;
+    }
+
+    window.addEventListener("mousemove", e => movePupil(e.clientX, e.clientY));
+    window.addEventListener("touchmove", e => {
+      if (e.touches && e.touches[0]) {
+        movePupil(e.touches[0].clientX, e.touches[0].clientY);
+      }
+    }, { passive: true });
+  } catch (e) {}
+})();
+
+/* =============================================================================
+   GLOBAL EXPOSURES (Fail-safe for inline onclick/onsubmit)
+   ============================================================================= */
+window.toggleAudio = function() {
+  const isEnabled = audio.toggle();
+  const soundBtn = document.getElementById("sound-btn");
+  if (soundBtn) {
     soundBtn.textContent = isEnabled ? "[ audio: on ]" : "[ audio: muted ]";
     soundBtn.style.color = isEnabled ? "#7cd986" : "";
-  });
+  }
+};
 
-  // Typing Audio
-  input.addEventListener("input", () => {
-    audio.playKeypress();
-  });
+window.submitPassword = function() {
+  const input = document.getElementById("password-input");
+  const output = document.getElementById("output-log");
+  const container = document.querySelector(".horror-container");
 
-  // Form Submit
-  form.addEventListener("submit", (e) => {
-    e.preventDefault();
-    const val = input.value.trim().toLowerCase();
-    if (!val) return;
+  if (!input || !output) return;
 
-    // Immediate click feedback
-    audio.playKeypress();
+  const rawVal = input.value.trim();
+  if (!rawVal) {
+    output.innerHTML = '<div class="log-line error">&gt; enter a password.</div>';
+    input.focus();
+    return;
+  }
 
-    // Check Password
-    const match = ARG_CONFIG.passwords[val];
+  const val = rawVal.toLowerCase();
+  audio.playKeypress();
 
-    output.innerHTML = ""; // Keep it simple and clean
+  const match = ARG_CONFIG.passwords[val];
+  output.innerHTML = "";
 
-    if (match) {
-      // SUCCESS
-      audio.playSuccessDrone();
+  if (match) {
+    // ACCESS GRANTED
+    audio.playSuccessDrone();
 
-      const lineTitle = document.createElement("div");
-      lineTitle.className = "log-line success";
-      lineTitle.textContent = `> ${match.title}`;
-      output.appendChild(lineTitle);
+    const lineTitle = document.createElement("div");
+    lineTitle.className = "log-line success";
+    lineTitle.textContent = `> ${match.title}`;
+    output.appendChild(lineTitle);
 
-      const lineMsg = document.createElement("div");
-      lineMsg.className = "log-line";
-      lineMsg.textContent = match.message;
-      output.appendChild(lineMsg);
+    const lineMsg = document.createElement("div");
+    lineMsg.className = "log-line";
+    lineMsg.textContent = match.message;
+    output.appendChild(lineMsg);
 
-      if (match.clue) {
-        const lineClue = document.createElement("div");
-        lineClue.className = "log-line clue";
-        lineClue.textContent = match.clue;
-        output.appendChild(lineClue);
-      }
+    if (match.clue) {
+      const lineClue = document.createElement("div");
+      lineClue.className = "log-line clue";
+      lineClue.textContent = match.clue;
+      output.appendChild(lineClue);
+    }
 
-      if (match.redirectUrl) {
-        setTimeout(() => {
-          window.location.href = match.redirectUrl;
-        }, 3000);
-      }
-    } else {
-      // DENIAL / ERROR
-      audio.playDenialDistortion();
+    if (match.redirectUrl) {
+      setTimeout(() => {
+        window.location.href = match.redirectUrl;
+      }, 3000);
+    }
+  } else {
+    // DENIED / ERROR
+    audio.playDenialBuzz();
 
-      // VHS tracking glitch
+    if (container) {
       container.classList.remove("glitch-active");
       void container.offsetWidth;
       container.classList.add("glitch-active");
-
-      const randomErr = ARG_CONFIG.errorMessages[
-        Math.floor(Math.random() * ARG_CONFIG.errorMessages.length)
-      ];
-
-      const errLine = document.createElement("div");
-      errLine.className = "log-line error";
-      errLine.textContent = `> ${randomErr}`;
-      output.appendChild(errLine);
     }
 
-    input.value = "";
-    input.focus();
-  });
-});
+    const randomErr = ARG_CONFIG.errorMessages[
+      Math.floor(Math.random() * ARG_CONFIG.errorMessages.length)
+    ];
+
+    const errLine = document.createElement("div");
+    errLine.className = "log-line error";
+    errLine.textContent = `> ${randomErr}`;
+    output.appendChild(errLine);
+  }
+
+  input.value = "";
+  input.focus();
+};
 
 /* =============================================================================
-   CONSOLE EASTER EGG
+   INITIALIZE LISTENERS
    ============================================================================= */
-(function printConsoleClue() {
-  console.log("%c[REC: 2008-11-04 // CAM-02]", "color: #ff1111; font-family: monospace; font-size: 13px;");
-  console.log("%cAll seeing eye is active. Don't look away from the screen.", "color: #888; font-family: monospace;");
-})();
+function initApp() {
+  // Override background if configured in JS
+  if (ARG_CONFIG.backgroundImage && ARG_CONFIG.backgroundImage.trim() !== "") {
+    const bg = document.getElementById("bg-layer");
+    if (bg) {
+      bg.style.backgroundImage = `url('${ARG_CONFIG.backgroundImage}')`;
+    }
+  }
+
+  const form = document.getElementById("password-form");
+  const input = document.getElementById("password-input");
+  const soundBtn = document.getElementById("sound-btn");
+
+  if (soundBtn) {
+    soundBtn.addEventListener("click", window.toggleAudio);
+  }
+
+  if (input) {
+    input.addEventListener("input", () => audio.playKeypress());
+  }
+
+  if (form) {
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      window.submitPassword();
+      return false;
+    });
+  }
+}
+
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", initApp);
+} else {
+  initApp();
+}
+
+console.log("[REC: 2008-11-04 // CAM-02] All seeing eye initialized. Passwords: 'eye', 'ouroboros', 'freak'");
