@@ -15,8 +15,8 @@ const ARG_CONFIG = {
   passwords: {
     "splitpersonality": {
       title: "ACCESS GRANTED",
-      message: "The fracture is recognized. Two minds, one vessel.",
-      clue: "Archive unlocked: 'What Occult Freak is going through.' The other side has awakened.",
+      message: "https://youtu.be/5ilOgo0vTD4",
+      clue: null,
       redirectUrl: null
     }
   },
@@ -351,7 +351,11 @@ window.submitPassword = function() {
 
     const lineMsg = document.createElement("div");
     lineMsg.className = "log-line";
-    lineMsg.textContent = match.message;
+    if (match.message && match.message.startsWith("http")) {
+      lineMsg.innerHTML = `&gt; <a href="${match.message}" target="_blank" rel="noopener noreferrer" style="color: #7cd986; text-decoration: underline; word-break: break-all;">${match.message}</a>`;
+    } else {
+      lineMsg.textContent = match.message;
+    }
     output.appendChild(lineMsg);
 
     if (match.clue) {
